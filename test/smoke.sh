@@ -6,7 +6,7 @@ tsc --version
 npm --version
 node --version
 ts-node --version
-gcloud version | head -n1 | grep -q "Google Cloud SDK"
+gcloud --version
 
 for bin in curl jq git ripgrep fzf make; do
   command -v "$bin" >/dev/null
