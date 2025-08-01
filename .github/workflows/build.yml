@@ -20,12 +20,8 @@ jobs:
       - uses: actions/checkout@v4
 
       # ===== prepare build context =====
-      # write secret file only in CI workspace
-      - name: Drop gcp_key.json from secret
-        run: echo "$GCP_KEY_JSON" > gcp_key.json
-        shell: bash
-        env:
-          GCP_KEY_JSON: ${{ secrets.GCP_KEY_JSON }}
+      - name: write gcp_key.json
+        run: printf '%s' '${{ secrets.GCP_KEY_JSON }}' > gcp_key.json
 
       # ===== set up builder =====
       - uses: docker/setup-qemu-action@v3
