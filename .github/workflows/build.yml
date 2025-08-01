@@ -62,7 +62,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
-            id=GCP_KEY_JSON,src=gcp_key.json
+            GCP_KEY_JSON=./gcp_key.json
 
       # optional: clean workspace
       - run: rm -f gcp_key.json
