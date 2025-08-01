@@ -14,8 +14,7 @@ EOF
 
 RUN dnf -y install google-cloud-cli && dnf clean all
 
-COPY gcp_key.json /etc/gcp_key.json
-RUN gcloud auth activate-service-account --key-file=/etc/gcp_key.json --quiet
+RUN --mount=type=secret,id=GCP_KEY_JSON gcloud auth activate-service-account --key-file=/run/secrets/GCP_KEY_JSON --quiet
 
 RUN npm install -g typescript ts-node
 
