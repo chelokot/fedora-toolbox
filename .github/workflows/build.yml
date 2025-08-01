@@ -44,20 +44,24 @@ jobs:
         with:
           images: ${{ env.IMAGE }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            # main → latest + YYYYMMDD
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+            type=raw,value={{date 'YYYYMMDD'}},enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+
+            # always: short SHA
             type=sha,format=short,prefix=sha-
-            type=raw,value={{date 'YYYYMMDD'}},enable={{is_default_branch}}
-            type=raw,value=${{ github.event.pull_request.number }},prefix=pr-,enable={{is_pr}}
+
+            # only for PRs
+            type=raw,value=pr-${{ github.event.pull_request.number || '' }},enable=${{ github.event_name == 'pull_request' }}
 
       # ===== build & (maybe) push =====
-      - uses: docker/build-push-action@v5  # :contentReference[oaicite:1]{index=1}
+      - uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Containerfile
-          push: ${{ steps.meta.outputs.tags != '' && github.event_name != 'pull_request' }}
+          push: ${{ steps.meta.outputs.tags != '' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # forward secret safely into build
           secrets: |
             "gcp_key.json=${{ secrets.GCP_KEY_JSON }}"
 
