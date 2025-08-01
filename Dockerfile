@@ -1,6 +1,6 @@
 FROM registry.fedoraproject.org/fedora-toolbox:42
 
-RUN dnf -y upgrade && dnf -y install zsh make git podman fuse-overlayfs slirp4netns golang npm pnpm ripgrep fzf libxcrypt-compat.x86_64
+RUN dnf -y upgrade && dnf -y install zsh make git podman fuse-overlayfs slirp4netns golang npm pnpm ripgrep fzf curl jq libxcrypt-compat.x86_64
 
 RUN tee /etc/yum.repos.d/google-cloud-cli.repo <<'EOF'
 [google-cloud-cli]
@@ -34,5 +34,11 @@ if [ -n "$XDG_RUNTIME_DIR" ]; then\n\
   export CONTAINER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\n\
   export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\n\
 fi\n' > /etc/profile.d/99-podman-remote.sh
+
+RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/latest | jq -r '.assets[] | select(.name|test("linux-x64$")) | .browser_download_url') && \
+    curl -sSL "$NOVA_URL" -o /usr/local/bin/nova && chmod +x /usr/local/bin/nova
+
+COPY test/smoke.sh /test/smoke.sh
+RUN bash -x /test/smoke.sh
 
 LABEL org.containers.toolbox="true"
