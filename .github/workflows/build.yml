@@ -58,12 +58,11 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Containerfile
-          push: ${{ steps.meta.outputs.tags != '' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
-            "gcp_key.json=${{ secrets.GCP_KEY_JSON }}"
+            GCP_KEY_JSON=${{ secrets.GCP_KEY_JSON }}
 
       # optional: clean workspace
       - run: rm -f gcp_key.json
