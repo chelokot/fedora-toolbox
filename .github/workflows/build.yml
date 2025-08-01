@@ -46,7 +46,7 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=short,prefix=sha-
-            type=calver,pattern={{date 'YYYYMMDD'}},enable={{is_default_branch}}
+            type=raw,value={{date 'YYYYMMDD'}},enable={{is_default_branch}}
             type=raw,value=${{ github.event.pull_request.number }},prefix=pr-,enable={{is_pr}}
 
       # ===== build & (maybe) push =====
