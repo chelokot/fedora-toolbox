@@ -8,7 +8,7 @@ node --version
 ts-node --version
 gcloud --version
 
-for bin in curl jq git ripgrep fzf make; do
+for bin in curl jq git make; do
   command -v "$bin" >/dev/null
 done
 
