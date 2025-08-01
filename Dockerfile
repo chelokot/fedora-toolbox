@@ -38,4 +38,7 @@ fi\n' > /etc/profile.d/99-podman-remote.sh
 RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/latest | jq -r '.assets[] | select(.name|test("linux-x64$")) | .browser_download_url') && \
     curl -sSL "$NOVA_URL" -o /usr/local/bin/nova && chmod +x /usr/local/bin/nova
 
+COPY test/smoke.sh /test/smoke.sh
+RUN /test/smoke.sh
+
 LABEL org.containers.toolbox="true"
