@@ -42,7 +42,7 @@ ENV PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
 RUN curl -fsSL https://ollama.com/install.sh | sh
 RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
     sleep 5 && \
-    ollama pull gemma-3n && \
+    ollama pull gemma3n:e4b && \
     pkill ollama || true
 
 COPY start-services.sh /usr/local/bin/start-services.sh
