@@ -38,7 +38,13 @@ fi\n' > /etc/profile.d/99-podman-remote.sh
 RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/latest | jq -r '.assets[] | select(.name|test("linux-x64$")) | .browser_download_url') && \
     curl -sSL "$NOVA_URL" -o /usr/local/bin/nova && chmod +x /usr/local/bin/nova
 
+RUN curl -fsSL https://ollama.com/install.sh | sh && ollama pull gemma-3n
+COPY start-services.sh /usr/local/bin/start-services.sh
+
 COPY test/smoke.sh /test/smoke.sh
 RUN bash -x /test/smoke.sh
 
 LABEL org.containers.toolbox="true"
+
+EXPOSE 11434
+ENTRYPOINT ["/usr/local/bin/start-services.sh"]
