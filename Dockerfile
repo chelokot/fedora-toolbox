@@ -40,7 +40,7 @@ RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/la
 
 ENV PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
 RUN curl -fsSL https://ollama.com/install.sh | sh
-RUN ollama serve --host 127.0.0.1 --port 11434 & \
+RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
     sleep 5 && \
     ollama pull gemma-3n && \
     pkill ollama || true
