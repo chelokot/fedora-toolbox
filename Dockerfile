@@ -38,9 +38,9 @@ fi\n' > /etc/profile.d/99-podman-remote.sh
 RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/latest | jq -r '.assets[] | select(.name|test("linux-x64$")) | .browser_download_url') && \
     curl -sSL "$NOVA_URL" -o /usr/local/bin/nova && chmod +x /usr/local/bin/nova
 
-RUN curl -fsSL https://ollama.com/install.sh | sh && \
-    ln -s /usr/local/bin/ollama /usr/bin/ollama && \
-    ollama serve --host 127.0.0.1 --port 11434 & \
+ENV PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
+RUN curl -fsSL https://ollama.com/install.sh | sh
+RUN ollama serve --host 127.0.0.1 --port 11434 & \
     sleep 5 && \
     ollama pull gemma-3n && \
     pkill ollama || true
