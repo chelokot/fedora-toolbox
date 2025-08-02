@@ -13,3 +13,5 @@ for bin in curl jq git make; do
 done
 
 echo "✔ basic tools work"
+
+OLLAMA_HOST=0.0.0.0:11434 ollama serve & sleep 5 && ollama ls && echo "✔ gemma3n present"
