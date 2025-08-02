@@ -13,3 +13,5 @@ for bin in curl jq git make; do
 done
 
 echo "✔ basic tools work"
+
+ollama ls | grep -q '^gemma-3n\s' && echo "✔ gemma-3n present"
