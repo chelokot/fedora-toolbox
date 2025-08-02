@@ -14,4 +14,4 @@ done
 
 echo "✔ basic tools work"
 
-OLLAMA_HOST=0.0.0.0:11434 ollama serve & sleep 5 && ollama ls | grep -q '^gemma-3n\s' && echo "✔ gemma-3n present"
+OLLAMA_HOST=0.0.0.0:11434 ollama serve & sleep 5 && ollama ls | grep -q '^gemma3n\s' && echo "✔ gemma3n present"
