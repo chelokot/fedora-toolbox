@@ -19,6 +19,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Free disk
+        uses: insightsengineering/disk-space-reclaimer@v1
+        with:
+          android: true
+          dotnet: true
+          swap-storage: true
+          docker-images: true
+          tool-cache: false
+
       # ===== prepare build context =====
       - name: write gcp_key.json
         run: printf '%s' '${{ secrets.GCP_KEY_JSON }}' > gcp_key.json
