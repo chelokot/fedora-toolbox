@@ -35,6 +35,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # ===== figure-out tags =====
+      - name: Set PR_TAG
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR_TAG=pr-${GITHUB_HEAD_REF//\//-}" >> $GITHUB_ENV
+        
       - id: meta
         uses: docker/metadata-action@v5
         with:
@@ -48,7 +53,7 @@ jobs:
             type=sha,format=short,prefix=sha-
 
             # only for PRs
-            type=raw,value=pr-{{ replace github.head_ref "/" "-" }},enable={{ eq github.event_name "pull_request" }}
+            type=raw,value=${{ env.PR_TAG }},enable=${{ github.event_name == 'pull_request' }}
 
       # ===== build =====
       - name: Build
