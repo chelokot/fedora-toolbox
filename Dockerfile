@@ -47,7 +47,9 @@ RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
 
 RUN dnf -y install gcc-c++ make cmake pkgconfig && dnf clean all
 
-RUN dnf -y install python3 python3-pip git && dnf clean all \
+RUN dnf -y install python3.12 python3.12-devel python3-pip \
+ && alternatives --set python3 /usr/bin/python3.12 \
+ && dnf clean all \
  && python3 -m venv /opt/comfy-venv \
  && . /opt/comfy-venv/bin/activate \
  && pip install --upgrade pip \
