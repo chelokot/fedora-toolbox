@@ -48,9 +48,8 @@ RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
 RUN dnf -y install gcc-c++ make cmake pkgconfig && dnf clean all
 
 RUN dnf -y install python3.12 python3.12-devel python3-pip \
- && alternatives --set python3 /usr/bin/python3.12 \
  && dnf clean all \
- && python3 -m venv /opt/comfy-venv \
+ && /usr/bin/python3.12 -m venv /opt/comfy-venv \
  && . /opt/comfy-venv/bin/activate \
  && pip install --upgrade pip \
  && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128 \
@@ -87,7 +86,7 @@ if [ -f /run/.containerenv ] && [[ $- == *i* ]]; then
     source /opt/comfy-venv/bin/activate
     (
       cd /opt/ComfyUI
-      nohup python main.py --listen 0.0.0.0 --port 8188 \
+      nohup /usr/bin/python3.12 main.py --listen 0.0.0.0 --port 8188 \
         </dev/null >/var/log/comfyui.log 2>&1 &
     )
   fi
