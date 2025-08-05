@@ -1,6 +1,6 @@
 FROM registry.fedoraproject.org/fedora-toolbox:42
 
-RUN dnf -y upgrade && dnf -y install zsh make git podman fuse-overlayfs slirp4netns golang npm pnpm ripgrep fzf curl jq libxcrypt-compat.x86_64
+RUN dnf -y upgrade && dnf -y install zsh make git podman fuse-overlayfs slirp4netns golang npm pnpm ripgrep fzf curl jq libxcrypt-compat.x86_64 && dnf clean all
 
 RUN tee /etc/yum.repos.d/google-cloud-cli.repo <<'EOF'
 [google-cloud-cli]
@@ -27,7 +27,7 @@ COPY skel-zshrc /etc/skel/.zshrc
 RUN chsh -s /usr/bin/zsh root || true
 RUN printf 'if [ -n "$BASH_VERSION" -a -t 1 ]; then exec /usr/bin/zsh -l; fi\n' > /etc/profile.d/90-auto-zsh.sh
 
-RUN dnf -y install podman-remote
+RUN dnf -y install podman-remote && dnf clean all
 RUN printf '#!/usr/bin/env sh\nexec /usr/bin/podman-remote "$@"\n' > /usr/bin/podman && chmod +x /usr/bin/podman && ln -sf /usr/bin/podman-remote /usr/bin/docker
 RUN printf '\
 if [ -n "$XDG_RUNTIME_DIR" ]; then\n\
@@ -45,14 +45,15 @@ RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
     ollama pull gemma3n:e4b && \
     pkill ollama || true
 
-RUN dnf -y install python3 python3-pip git  \
+RUN dnf -y install gcc-c++ make cmake pkgconfig && dnf clean all
+
+RUN dnf -y install python3 python3-pip git && dnf clean all \
  && python3 -m venv /opt/comfy-venv \
  && . /opt/comfy-venv/bin/activate \
  && pip install --upgrade pip \
  && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128 \
  && git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
  && pip install -r /opt/ComfyUI/requirements.txt
-
 
 RUN git clone --depth=1 https://github.com/Comfy-Org/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
 RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF.git /opt/ComfyUI/custom_nodes/ComfyUI-GGUF
