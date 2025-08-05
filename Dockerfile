@@ -47,8 +47,8 @@ RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
 
 COPY start-services.sh /usr/local/bin/start-services.sh
 
-COPY test/smoke.sh /test/smoke.sh
-RUN bash -x /test/smoke.sh
+COPY test/build/smoke.sh /test/build/smoke.sh
+RUN bash -x /test/build/smoke.sh
 
 LABEL org.containers.toolbox="true"
 
