@@ -61,10 +61,10 @@ RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF.git /opt/ComfyUI/
 
 RUN mkdir -p /opt/ComfyUI/models/diffusion_models \
  && curl -L https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q4_0.gguf \
-        -o /opt/ComfyUI/models/diffusion_models/qwen-image-Q4_0.gguf \
+        -o /opt/ComfyUI/models/diffusion_models/qwen-image-Q4_0.gguf
 RUN mkdir -p /opt/ComfyUI/models/text_encoders \
  && curl -L https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors \
-        -o /opt/ComfyUI/models/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors \
+        -o /opt/ComfyUI/models/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors
 RUN mkdir -p /opt/ComfyUI/models/vae \
  && curl -L https://huggingface.co/Qwen/Qwen-Image/resolve/main/vae/diffusion_pytorch_model.safetensors \
         -o /opt/ComfyUI/models/vae/qwen_image_vae.safetensors
