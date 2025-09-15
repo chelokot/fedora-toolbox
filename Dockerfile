@@ -23,6 +23,45 @@ RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /opt/oh-my-zsh &&
     git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git /opt/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
     git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
+# Locale + UTF-8 for clean glyphs (no host changes)
+RUN dnf -y install glibc-langpack-en && dnf clean all
+ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+# Fix compaudit perms on shared theme dir
+RUN chmod -R go-w /opt/oh-my-zsh
+
+# Global, ASCII-only Powerlevel10k config (no Nerd Font required)
+RUN printf '%s\n' '\
+# Minimal fast Powerlevel10k (ASCII)\n\
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)\n\
+typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time time)\n\
+typeset -g POWERLEVEL9K_PROMPT_ON_NEWLINE=true\n\
+typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=""\n\
+typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX=">>> "\n\
+typeset -g POWERLEVEL9K_TIME_FORMAT=%D{%H:%M:%S}\n\
+typeset -g POWERLEVEL9K_MODE=compatible\n\
+typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique\n\
+typeset -g POWERLEVEL9K_SHORTEN_DIR_LENGTH=3\n\
+typeset -g POWERLEVEL9K_VCS_MAX_INDEX_SIZE_DIRTY=-1\n\
+' > /etc/p10k.zsh
+
+# Global zshrc so config applies regardless of host $HOME bind mount
+RUN printf '%s\n' '\
+export ZSH=/opt/oh-my-zsh\n\
+export ZSH_DISABLE_COMPFIX=true\n\
+export DISABLE_AUTO_TITLE=true\n\
+# Completion cache in /tmp to avoid host perms weirdness\n\
+ZSH_COMPDUMP=${XDG_CACHE_HOME:-/tmp}/zsh/.zcompdump-$HOST-$UID\n\
+mkdir -p ${ZSH_COMPDUMP:h} 2>/dev/null || true\n\
+autoload -Uz compinit; compinit -C -d "$ZSH_COMPDUMP"\n\
+# Plugins (syntax-highlighting must be last)\n\
+plugins=(git fzf zsh-autosuggestions zsh-syntax-highlighting)\n\
+ZSH_THEME=\"powerlevel10k/powerlevel10k\"\n\
+source $ZSH/oh-my-zsh.sh\n\
+[ -r /usr/share/fzf/shell/key-bindings.zsh ] && source /usr/share/fzf/shell/key-bindings.zsh\n\
+[ -r /etc/p10k.zsh ] && source /etc/p10k.zsh\n\
+' > /etc/zshrc
+
 COPY skel-zshrc /etc/skel/.zshrc
 RUN chsh -s /usr/bin/zsh root || true
 RUN printf 'if [ -n "$BASH_VERSION" -a -t 1 ]; then exec /usr/bin/zsh -l; fi\n' > /etc/profile.d/90-auto-zsh.sh
