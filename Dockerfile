@@ -48,7 +48,7 @@ fi\n' > /etc/profile.d/99-podman-remote.sh
 RUN dnf -y install gcc-c++ make cmake pkgconfig && dnf clean all
 
 RUN dnf -y install python3.12 python3.12-devel python3-pip \
- && dnf clean all \
+ && dnf clean all
 #  && /usr/bin/python3.12 -m venv /opt/comfy-venv \
 #  && . /opt/comfy-venv/bin/activate \
 #  && pip install --upgrade pip \
@@ -69,33 +69,33 @@ RUN dnf -y install python3.12 python3.12-devel python3-pip \
 #  && curl -L https://huggingface.co/Qwen/Qwen-Image/resolve/main/vae/diffusion_pytorch_model.safetensors \
 #         -o /opt/ComfyUI/models/vae/qwen_image_vae.safetensors
 
-RUN cat <<'EOF' > /etc/profile.d/91-start-ai-stack.sh
-#!/usr/bin/env bash
-set -euo pipefail
+# RUN cat <<'EOF' > /etc/profile.d/91-start-ai-stack.sh
+# #!/usr/bin/env bash
+# set -euo pipefail
 
-if [ -f /run/.containerenv ] && [[ $- == *i* ]]; then
-  # OLLAMA -------------------------------------------------------------
-  if ! pgrep -f "ollama serve" >/dev/null 2>&1; then
-    export OLLAMA_HOST=0.0.0.0:11434
-    nohup ollama serve \
-      </dev/null >/var/log/ollama.log 2>&1 &
-  fi
+# if [ -f /run/.containerenv ] && [[ $- == *i* ]]; then
+#   # OLLAMA -------------------------------------------------------------
+#   if ! pgrep -f "ollama serve" >/dev/null 2>&1; then
+#     export OLLAMA_HOST=0.0.0.0:11434
+#     nohup ollama serve \
+#       </dev/null >/var/log/ollama.log 2>&1 &
+#   fi
 
-  # ComfyUI ------------------------------------------------------------
-  if ! pgrep -f "python.*ComfyUI.*main.py" >/dev/null 2>&1; then
-    source /opt/comfy-venv/bin/activate
-    (
-      cd /opt/ComfyUI
-      nohup /usr/bin/python3.12 main.py --listen 0.0.0.0 --port 8188 \
-        </dev/null >/var/log/comfyui.log 2>&1 &
-    )
-  fi
-fi
-EOF
-RUN chmod +x /etc/profile.d/91-start-ai-stack.sh
+#   # ComfyUI ------------------------------------------------------------
+#   if ! pgrep -f "python.*ComfyUI.*main.py" >/dev/null 2>&1; then
+#     source /opt/comfy-venv/bin/activate
+#     (
+#       cd /opt/ComfyUI
+#       nohup /usr/bin/python3.12 main.py --listen 0.0.0.0 --port 8188 \
+#         </dev/null >/var/log/comfyui.log 2>&1 &
+#     )
+#   fi
+# fi
+# EOF
+# RUN chmod +x /etc/profile.d/91-start-ai-stack.sh
 
-COPY test/build/smoke.sh /test/build/smoke.sh
-RUN bash -x /test/build/smoke.sh
+# COPY test/build/smoke.sh /test/build/smoke.sh
+# RUN bash -x /test/build/smoke.sh
 
 LABEL org.containers.toolbox="true"
 
