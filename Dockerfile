@@ -40,10 +40,10 @@ RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/la
 
 ENV PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
 RUN curl -fsSL https://ollama.com/install.sh | sh
-RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
-    sleep 5 && \
-    ollama pull gemma3n:e4b && \
-    pkill ollama || true
+# RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
+#     sleep 5 && \
+#     ollama pull gemma3n:e4b && \
+#     pkill ollama || true
 
 RUN dnf -y install gcc-c++ make cmake pkgconfig && dnf clean all
 
@@ -59,15 +59,15 @@ RUN dnf -y install python3.12 python3.12-devel python3-pip \
 RUN git clone --depth=1 https://github.com/Comfy-Org/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
 RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF.git /opt/ComfyUI/custom_nodes/ComfyUI-GGUF
 
-RUN mkdir -p /opt/ComfyUI/models/diffusion_models \
- && curl -L https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q4_0.gguf \
-        -o /opt/ComfyUI/models/diffusion_models/qwen-image-Q4_0.gguf
-RUN mkdir -p /opt/ComfyUI/models/text_encoders \
- && curl -L https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors \
-        -o /opt/ComfyUI/models/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors
-RUN mkdir -p /opt/ComfyUI/models/vae \
- && curl -L https://huggingface.co/Qwen/Qwen-Image/resolve/main/vae/diffusion_pytorch_model.safetensors \
-        -o /opt/ComfyUI/models/vae/qwen_image_vae.safetensors
+# RUN mkdir -p /opt/ComfyUI/models/diffusion_models \
+#  && curl -L https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q4_0.gguf \
+#         -o /opt/ComfyUI/models/diffusion_models/qwen-image-Q4_0.gguf
+# RUN mkdir -p /opt/ComfyUI/models/text_encoders \
+#  && curl -L https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors \
+#         -o /opt/ComfyUI/models/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors
+# RUN mkdir -p /opt/ComfyUI/models/vae \
+#  && curl -L https://huggingface.co/Qwen/Qwen-Image/resolve/main/vae/diffusion_pytorch_model.safetensors \
+#         -o /opt/ComfyUI/models/vae/qwen_image_vae.safetensors
 
 RUN cat <<'EOF' > /etc/profile.d/91-start-ai-stack.sh
 #!/usr/bin/env bash
