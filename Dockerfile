@@ -35,11 +35,11 @@ if [ -n "$XDG_RUNTIME_DIR" ]; then\n\
   export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\n\
 fi\n' > /etc/profile.d/99-podman-remote.sh
 
-RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/latest | jq -r '.assets[] | select(.name|test("linux-x64$")) | .browser_download_url') && \
-    curl -sSL "$NOVA_URL" -o /usr/local/bin/nova && chmod +x /usr/local/bin/nova
+# RUN NOVA_URL=$(curl -sS https://api.github.com/repos/ExposedCat/nova/releases/latest | jq -r '.assets[] | select(.name|test("linux-x64$")) | .browser_download_url') && \
+    # curl -sSL "$NOVA_URL" -o /usr/local/bin/nova && chmod +x /usr/local/bin/nova
 
-ENV PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
-RUN curl -fsSL https://ollama.com/install.sh | sh
+# ENV PATH="/usr/local/bin:/usr/local/sbin:${PATH}"
+# RUN curl -fsSL https://ollama.com/install.sh | sh
 # RUN OLLAMA_HOST=0.0.0.0:11434 ollama serve & \
 #     sleep 5 && \
 #     ollama pull gemma3n:e4b && \
@@ -49,15 +49,15 @@ RUN dnf -y install gcc-c++ make cmake pkgconfig && dnf clean all
 
 RUN dnf -y install python3.12 python3.12-devel python3-pip \
  && dnf clean all \
- && /usr/bin/python3.12 -m venv /opt/comfy-venv \
- && . /opt/comfy-venv/bin/activate \
- && pip install --upgrade pip \
- && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128 \
- && git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
- && pip install -r /opt/ComfyUI/requirements.txt
+#  && /usr/bin/python3.12 -m venv /opt/comfy-venv \
+#  && . /opt/comfy-venv/bin/activate \
+#  && pip install --upgrade pip \
+#  && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128 \
+#  && git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI \
+#  && pip install -r /opt/ComfyUI/requirements.txt
 
-RUN git clone --depth=1 https://github.com/Comfy-Org/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
-RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF.git /opt/ComfyUI/custom_nodes/ComfyUI-GGUF
+# RUN git clone --depth=1 https://github.com/Comfy-Org/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
+# RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF.git /opt/ComfyUI/custom_nodes/ComfyUI-GGUF
 
 # RUN mkdir -p /opt/ComfyUI/models/diffusion_models \
 #  && curl -L https://huggingface.co/city96/Qwen-Image-gguf/resolve/main/qwen-image-Q4_0.gguf \
