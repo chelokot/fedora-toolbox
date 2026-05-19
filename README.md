@@ -19,3 +19,5 @@ distrobox-export --app app-name
 Inside Distrobox, `xdg-open`, `gio`, `dbus-run-session`, `podman`, `docker`, `distrobox`, and `systemctl` call the host through `distrobox-host-exec`. This keeps browser/link opening, host containers, and host systemd commands usable from the dev shell.
 
 Codex is installed with Bun in the image. Runtime state stays in the mounted home directory under `$HOME/.codex`.
+
+Fish is the default shell for repo-managed Distrobox containers. The image includes Starship, Fisher, and `chelokot/starship-show-on-command.fish`; default fish and Starship configs are copied into `/etc/skel`.
