@@ -13,15 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
       packages: write
     env:
       IMAGE: ghcr.io/${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: write gcp_key.json
-        run: printf '%s' '${{ secrets.GCP_KEY_JSON }}' > gcp_key.json
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -63,8 +59,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          secret-files: |
-            GCP_KEY_JSON=./gcp_key.json
 
       # - name: Smoke test
       #   env:
