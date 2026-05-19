@@ -11,9 +11,14 @@ required_bins=(
   curl
   dbus-run-session
   deno
+  delta
   distrobox
   docker
+  eza
   fd
+  ffmpeg
+  ffprobe
+  fish
   fzf
   gcc
   gh
@@ -26,7 +31,9 @@ required_bins=(
   helmfile
   ei-debug-events
   jq
+  just
   kubectl
+  magick
   make
   mypy
   node
@@ -40,7 +47,10 @@ required_bins=(
   python3.12
   rg
   ruff
+  shellcheck
+  shfmt
   sqlite3
+  starship
   systemctl
   terraform
   ts-node
@@ -53,8 +63,9 @@ required_bins=(
   wtype
   xdg-open
   yamllint
+  yq
+  yt-dlp
   ydotool
-  zsh
 )
 
 for bin in "${required_bins[@]}"; do
@@ -120,13 +131,20 @@ az version --output none
 bun --version
 codex --version
 deno --version
+delta --version
+eza --version
+ffmpeg -version >/dev/null
+ffprobe -version >/dev/null
+fish --version
 gh --version
 glab --version
 gcloud --version
 go version
 helm version --short
-helmfile version
+helmfile --version
+just --version
 kubectl version --client=true
+magick -version
 node --version
 npm --version
 openstack --version
@@ -134,10 +152,16 @@ poetry --version
 python3 --version
 python3.12 --version
 rustc --version
+shellcheck --version
+shfmt --version
+starship --version
 terraform version
 ts-node --version
 tsc --version
 uv --version
+yq --version
+yt-dlp --version
+fish -lc 'functions -q fisher; functions -q starship-soc; test -r /etc/starship.toml; test -r /etc/skel/.config/fish/config.fish; test -r /etc/skel/.config/fish/fish_plugins; test -r /etc/skel/.config/starship.toml'
 
 if [ -n "${DISTROBOX_ENTER_PATH:-}" ]; then
   command -v distrobox-export >/dev/null
@@ -147,5 +171,6 @@ test ! -d /root/.config/gcloud/legacy_credentials
 test ! -e /run/secrets/gcp_key.json
 test ! -d /opt/ComfyUI
 ! command -v ollama >/dev/null
+! command -v zsh >/dev/null
 
 echo "basic toolbox tools work"

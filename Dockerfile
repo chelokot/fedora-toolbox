@@ -9,7 +9,7 @@ ENV LANG=en_US.UTF-8 \
 
 RUN dnf -y upgrade && \
     dnf -y install \
-      bash-completion bc bind-utils bzip2 curl dbus dbus-daemon dbus-tools diffutils fd-find findutils fuse-overlayfs fzf gcc gcc-c++ git git-lfs glib2 glib2-devel glibc-langpack-en gnupg2 golang hostname iproute iputils jq keyutils krb5-libs less libX11-devel libXcursor-devel libXi-devel libXinerama-devel libXrandr-devel libXxf86vm-devel libei-utils libxcrypt-compat.x86_64 libxkbcommon-devel lsof make man-db man-pages mesa-libGL-devel mtr ncurses ninja-build nmap-ncat npm openssl pam passwd pigz pinentry pipx pkgconf-pkg-config podman-compose podman-remote postgresql ripgrep rust cargo rustfmt rsync shadow-utils slirp4netns sqlite strace sudo tcpdump time traceroute tree unzip util-linux util-linux-script vte-profile wev weston weston-demo wget which whois wl-clipboard words wtype xdg-dbus-proxy xdg-utils xorg-x11-xauth xz ydotool zip zsh \
+      bash-completion bat bc bind-utils bzip2 curl dbus dbus-daemon dbus-tools diffutils eza fd-find ffmpeg-free findutils fish fuse-overlayfs fzf gcc gcc-c++ git git-delta git-lfs glib2 glib2-devel glibc-langpack-en gnupg2 golang hostname ImageMagick iproute iputils jq just keyutils krb5-libs less libX11-devel libXcursor-devel libXi-devel libXinerama-devel libXrandr-devel libXxf86vm-devel libei-utils libxcrypt-compat.x86_64 libxkbcommon-devel lsof make man-db man-pages mesa-libGL-devel mtr ncurses ninja-build nmap-ncat npm openssl pam passwd pigz pinentry pipx pkgconf-pkg-config podman-compose podman-remote postgresql ripgrep rust cargo rustfmt rsync shadow-utils ShellCheck shfmt slirp4netns sqlite strace sudo tcpdump time traceroute tree unzip util-linux util-linux-script vte-profile wev weston weston-demo wget which whois wl-clipboard words wtype xdg-dbus-proxy xdg-utils xorg-x11-xauth xz ydotool yq yt-dlp zip \
       cmake clang clang-tools-extra java-21-openjdk java-21-openjdk-devel python3 python3-devel python3-pip python3.12 python3.12-devel python3-dotenv python3-lxml python3-pyyaml && \
     dnf clean all
 
@@ -62,42 +62,26 @@ RUN curl -fsSL https://bun.sh/install | bash && \
     corepack enable && \
     curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 
-RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /opt/oh-my-zsh && \
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /opt/oh-my-zsh/custom/themes/powerlevel10k && \
-    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git /opt/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
-    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git /opt/oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
-    chmod -R go-w /opt/oh-my-zsh
+RUN curl -fsSL https://starship.rs/install.sh | sh -s -- --yes --bin-dir /usr/bin && \
+    mkdir -p /usr/share/fish/vendor_conf.d /usr/share/fish/vendor_functions.d /usr/share/fish/vendor_completions.d && \
+    curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish -o /usr/share/fish/vendor_functions.d/fisher.fish && \
+    curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/completions/fisher.fish -o /usr/share/fish/vendor_completions.d/fisher.fish && \
+    git clone --depth=1 https://github.com/chelokot/starship-show-on-command.fish.git /tmp/starship-show-on-command.fish && \
+    cp /tmp/starship-show-on-command.fish/conf.d/*.fish /usr/share/fish/vendor_conf.d/ && \
+    cp /tmp/starship-show-on-command.fish/functions/*.fish /usr/share/fish/vendor_functions.d/ && \
+    rm -rf /tmp/starship-show-on-command.fish
 
-RUN printf '%s\n' '\
-typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)\n\
-typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time time)\n\
-typeset -g POWERLEVEL9K_PROMPT_ON_NEWLINE=true\n\
-typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=""\n\
-typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX=">>> "\n\
-typeset -g POWERLEVEL9K_TIME_FORMAT=%D{%H:%M:%S}\n\
-typeset -g POWERLEVEL9K_MODE=compatible\n\
-typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique\n\
-typeset -g POWERLEVEL9K_SHORTEN_DIR_LENGTH=3\n\
-typeset -g POWERLEVEL9K_VCS_MAX_INDEX_SIZE_DIRTY=-1\n\
-' > /etc/p10k.zsh
-
-RUN printf '%s\n' '\
-export ZSH=/opt/oh-my-zsh\n\
-export ZSH_DISABLE_COMPFIX=true\n\
-export DISABLE_AUTO_TITLE=true\n\
-ZSH_COMPDUMP=${XDG_CACHE_HOME:-/tmp}/zsh/.zcompdump-$HOST-$UID\n\
-mkdir -p ${ZSH_COMPDUMP:h} 2>/dev/null || true\n\
-autoload -Uz compinit; compinit -C -d "$ZSH_COMPDUMP"\n\
-plugins=(git fzf zsh-autosuggestions zsh-syntax-highlighting)\n\
-ZSH_THEME="powerlevel10k/powerlevel10k"\n\
-source $ZSH/oh-my-zsh.sh\n\
-[ -r /usr/share/fzf/shell/key-bindings.zsh ] && source /usr/share/fzf/shell/key-bindings.zsh\n\
-[ -r /etc/p10k.zsh ] && source /etc/p10k.zsh\n\
-' > /etc/zshrc
-
-COPY skel-zshrc /etc/skel/.zshrc
-RUN chsh -s /usr/bin/zsh root || true && \
-    printf 'if [ -n "$BASH_VERSION" -a -t 1 ]; then exec /usr/bin/zsh -l; fi\n' > /etc/profile.d/90-auto-zsh.sh
+RUN mkdir -p /etc/skel/.config/fish
+COPY fish/config.fish /etc/skel/.config/fish/config.fish
+COPY fish/fish_plugins /etc/skel/.config/fish/fish_plugins
+COPY starship.toml /etc/starship.toml
+COPY starship.toml /etc/skel/.config/starship.toml
+RUN mkdir -p /root/.config/fish && \
+    cp /etc/skel/.config/fish/config.fish /root/.config/fish/config.fish && \
+    cp /etc/skel/.config/fish/fish_plugins /root/.config/fish/fish_plugins && \
+    cp /etc/skel/.config/starship.toml /root/.config/starship.toml && \
+    chsh -s /usr/bin/fish root || true && \
+    printf 'if [ -n "$BASH_VERSION" -a -t 1 ] && [ -z "$FEDORA_TOOLBOX_NO_AUTO_FISH" ]; then exec /usr/bin/fish -l; fi\n' > /etc/profile.d/90-auto-fish.sh
 
 RUN for bin in xdg-open gio dbus-run-session systemctl distrobox; do \
       printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec %s "$@"; fi\nexec /usr/bin/%s "$@"\n' "$bin" "$bin" > "/usr/local/bin/$bin"; \
