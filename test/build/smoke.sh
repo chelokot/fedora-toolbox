@@ -161,7 +161,7 @@ tsc --version
 uv --version
 yq --version
 yt-dlp --version
-fish -lc 'functions -q fisher; functions -q starship-soc; test -r /etc/starship.toml; test -r /etc/skel/.config/fish/config.fish; test -r /etc/skel/.config/fish/fish_plugins; test -r /etc/skel/.config/starship.toml'
+fish -lc "functions -q fisher; functions -q starship-soc; test -r /etc/starship.toml; test -r /etc/skel/.config/fish/config.fish; test -r /etc/skel/.config/fish/fish_plugins; test -r /etc/fish/conf.d/00-exposedcat-greeting.fish; test -r /etc/fish/conf.d/10-exposedcat-colors.fish; test -r /etc/skel/.config/starship.toml; test \"\$fish_greeting\" = \"\"; test \"\$fish_color_command\" = 7ee787; test \"\$fish_color_error\" = ff6b81"
 
 if [ -n "${DISTROBOX_ENTER_PATH:-}" ]; then
   command -v distrobox-export >/dev/null
@@ -170,7 +170,11 @@ fi
 test ! -d /root/.config/gcloud/legacy_credentials
 test ! -e /run/secrets/gcp_key.json
 test ! -d /opt/ComfyUI
-! command -v ollama >/dev/null
-! command -v zsh >/dev/null
+if command -v ollama >/dev/null; then
+  exit 1
+fi
+if command -v zsh >/dev/null; then
+  exit 1
+fi
 
 echo "basic toolbox tools work"
