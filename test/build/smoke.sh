@@ -24,6 +24,7 @@ required_bins=(
   go
   helm
   helmfile
+  ei-debug-events
   jq
   kubectl
   make
@@ -45,8 +46,14 @@ required_bins=(
   ts-node
   tsc
   uv
+  wev
+  weston
+  wl-copy
+  wl-paste
+  wtype
   xdg-open
   yamllint
+  ydotool
   zsh
 )
 
