@@ -9,7 +9,7 @@ ENV LANG=en_US.UTF-8 \
 
 RUN dnf -y upgrade && \
     dnf -y install \
-      bash-completion bc bind-utils bzip2 curl dbus dbus-tools diffutils fd-find findutils fuse-overlayfs fzf gcc gcc-c++ git git-lfs glib2 glib2-devel glibc-langpack-en gnupg2 golang hostname iproute iputils jq keyutils krb5-libs less libX11-devel libXcursor-devel libXi-devel libXinerama-devel libXrandr-devel libXxf86vm-devel libxcrypt-compat.x86_64 libxkbcommon-devel lsof make man-db man-pages mesa-libGL-devel mtr ncurses ninja-build nmap-ncat npm openssl pam passwd pigz pinentry pipx pkgconf-pkg-config podman-compose podman-remote postgresql ripgrep rust cargo rustfmt rsync shadow-utils slirp4netns sqlite strace sudo tcpdump time traceroute tree unzip util-linux util-linux-script vte-profile wget which whois words xdg-dbus-proxy xdg-utils xorg-x11-xauth xz zip zsh \
+      bash-completion bc bind-utils bzip2 curl dbus dbus-daemon dbus-tools diffutils fd-find findutils fuse-overlayfs fzf gcc gcc-c++ git git-lfs glib2 glib2-devel glibc-langpack-en gnupg2 golang hostname iproute iputils jq keyutils krb5-libs less libX11-devel libXcursor-devel libXi-devel libXinerama-devel libXrandr-devel libXxf86vm-devel libxcrypt-compat.x86_64 libxkbcommon-devel lsof make man-db man-pages mesa-libGL-devel mtr ncurses ninja-build nmap-ncat npm openssl pam passwd pigz pinentry pipx pkgconf-pkg-config podman-compose podman-remote postgresql ripgrep rust cargo rustfmt rsync shadow-utils slirp4netns sqlite strace sudo tcpdump time traceroute tree unzip util-linux util-linux-script vte-profile wget which whois words xdg-dbus-proxy xdg-utils xorg-x11-xauth xz zip zsh \
       cmake clang clang-tools-extra java-21-openjdk java-21-openjdk-devel python3 python3-devel python3-pip python3.12 python3.12-devel python3-dotenv python3-lxml python3-pyyaml && \
     dnf clean all
 
@@ -99,10 +99,12 @@ COPY skel-zshrc /etc/skel/.zshrc
 RUN chsh -s /usr/bin/zsh root || true && \
     printf 'if [ -n "$BASH_VERSION" -a -t 1 ]; then exec /usr/bin/zsh -l; fi\n' > /etc/profile.d/90-auto-zsh.sh
 
-RUN printf '#!/usr/bin/env sh\nif command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec xdg-open "$@"; fi\nexec /usr/bin/xdg-open "$@"\n' > /usr/local/bin/xdg-open && \
-    printf '#!/usr/bin/env sh\nif command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec podman "$@"; fi\nexec /usr/bin/podman-remote "$@"\n' > /usr/local/bin/podman && \
-    printf '#!/usr/bin/env sh\nif command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec docker "$@"; fi\nexec /usr/bin/podman-remote "$@"\n' > /usr/local/bin/docker && \
-    chmod +x /usr/local/bin/xdg-open /usr/local/bin/podman /usr/local/bin/docker && \
+RUN for bin in xdg-open gio dbus-run-session systemctl distrobox; do \
+      printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec %s "$@"; fi\nexec /usr/bin/%s "$@"\n' "$bin" "$bin" > "/usr/local/bin/$bin"; \
+    done && \
+    printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec podman "$@"; fi\nexec /usr/bin/podman-remote "$@"\n' > /usr/local/bin/podman && \
+    printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec docker "$@"; fi\nexec /usr/bin/podman-remote "$@"\n' > /usr/local/bin/docker && \
+    chmod +x /usr/local/bin/xdg-open /usr/local/bin/gio /usr/local/bin/dbus-run-session /usr/local/bin/systemctl /usr/local/bin/distrobox /usr/local/bin/podman /usr/local/bin/docker && \
     printf 'if [ -n "$XDG_RUNTIME_DIR" ]; then\n  export CONTAINER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\n  export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\nfi\n' > /etc/profile.d/99-podman-remote.sh
 
 COPY test/build/smoke.sh /test/build/smoke.sh

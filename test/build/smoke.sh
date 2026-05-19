@@ -9,13 +9,16 @@ required_bins=(
   cmake
   codex
   curl
+  dbus-run-session
   deno
+  distrobox
   docker
   fd
   fzf
   gcc
   gh
   git
+  gio
   glab
   gcloud
   go
@@ -37,6 +40,7 @@ required_bins=(
   rg
   ruff
   sqlite3
+  systemctl
   terraform
   ts-node
   tsc
@@ -88,6 +92,22 @@ for dep in "${distrobox_deps[@]}"; do
   command -v "$dep" >/dev/null
 done
 
+host_bridges=(
+  dbus-run-session
+  distrobox
+  docker
+  gio
+  podman
+  systemctl
+  xdg-open
+)
+
+for bridge in "${host_bridges[@]}"; do
+  path="$(command -v "$bridge")"
+  test "${path#/usr/local/bin/}" != "$path"
+  grep -q "distrobox-host-exec $bridge" "$path"
+done
+
 aws --version
 az version --output none
 bun --version
@@ -111,6 +131,10 @@ terraform version
 ts-node --version
 tsc --version
 uv --version
+
+if [ -n "${DISTROBOX_ENTER_PATH:-}" ]; then
+  command -v distrobox-export >/dev/null
+fi
 
 test ! -d /root/.config/gcloud/legacy_credentials
 test ! -e /run/secrets/gcp_key.json
