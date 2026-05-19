@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-name="toolbox-smoke"
+name="${NAME:-fedora-toolbox-smoke}"
 image="${IMAGE:-fedora-toolbox:test}"
-
-# create and enter toolbox
-if toolbox list | grep -q "^$name\b"; then
-  toolbox rm -f "$name"
-fi
-
-toolbox create -y -c "$name" --image "$image"
-# ensure entrypoint works by a simple command
-toolbox run -c "$name" echo "entered toolbox"
-# run build smoke test inside toolbox
-# assume repository is mounted at current directory
 script_path="$(dirname "$0")/../build/smoke.sh"
-# use absolute path for toolbox run
 abs_script="$(readlink -f "$script_path")"
-toolbox run -c "$name" bash -lc "$abs_script"
+
+if command -v distrobox >/dev/null 2>&1; then
+  distrobox rm --force "$name" >/dev/null 2>&1 || true
+  distrobox create --yes --name "$name" --image "$image"
+  distrobox enter "$name" -- bash -lc "$abs_script"
+elif command -v toolbox >/dev/null 2>&1; then
+  if toolbox list | grep -q "^$name\b"; then
+    toolbox rm -f "$name"
+  fi
+  toolbox create -y -c "$name" --image "$image"
+  toolbox run -c "$name" bash -lc "$abs_script"
+else
+  echo "Neither distrobox nor toolbox is installed" >&2
+  exit 1
+fi
