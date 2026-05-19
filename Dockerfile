@@ -1,5 +1,7 @@
 FROM quay.io/fedora/fedora-toolbox:43
 
+ARG EXPOSEDCAT_DOTFILES_REF=0b9071e95f67f67dabb917d761a4fa2948c1148e
+
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
     BUN_INSTALL=/opt/bun \
@@ -71,7 +73,15 @@ RUN curl -fsSL https://starship.rs/install.sh | sh -s -- --yes --bin-dir /usr/bi
     cp /tmp/starship-show-on-command.fish/functions/*.fish /usr/share/fish/vendor_functions.d/ && \
     rm -rf /tmp/starship-show-on-command.fish
 
-RUN mkdir -p /etc/skel/.config/fish
+RUN mkdir -p /etc/fish/conf.d /etc/skel/.config/fish && \
+    curl -fsSL "https://raw.githubusercontent.com/ExposedCat/dotfiles/${EXPOSEDCAT_DOTFILES_REF}/fish/colors.fish" -o /etc/fish/conf.d/10-exposedcat-colors.fish && \
+    sed -i \
+      -e 's/^set -Ux fish_color_command .*/set -Ux fish_color_command 7ee787/' \
+      -e 's/^set -Ux fish_color_error .*/set -Ux fish_color_error ff6b81/' \
+      /etc/fish/conf.d/10-exposedcat-colors.fish && \
+    curl -fsSL "https://raw.githubusercontent.com/ExposedCat/dotfiles/${EXPOSEDCAT_DOTFILES_REF}/fish/config.fish" -o /tmp/exposedcat-config.fish && \
+    grep -E '^[[:space:]]*set[[:space:]]+-g[[:space:]]+fish_greeting([[:space:]]|$)' /tmp/exposedcat-config.fish > /etc/fish/conf.d/00-exposedcat-greeting.fish && \
+    rm -f /tmp/exposedcat-config.fish
 COPY fish/config.fish /etc/skel/.config/fish/config.fish
 COPY fish/fish_plugins /etc/skel/.config/fish/fish_plugins
 COPY starship.toml /etc/starship.toml
