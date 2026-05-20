@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+container="${FEDORA_TOOLBOX_CONTAINER:-fedora-toolbox}"
+user="${FEDORA_TOOLBOX_USER:-${USER:-chelokot}}"
+workdir="${PWD:-$HOME}"
+
+if [[ ! -d "$workdir" ]]; then
+  workdir="$HOME"
+fi
+
+env_args=()
+for name in \
+  COLORTERM \
+  DBUS_SESSION_BUS_ADDRESS \
+  DESKTOP_SESSION \
+  DISPLAY \
+  LANG \
+  PTYXIS_PROFILE \
+  PTYXIS_VERSION \
+  SSH_AUTH_SOCK \
+  TERM \
+  VTE_VERSION \
+  WAYLAND_DISPLAY \
+  XAUTHORITY \
+  XDG_CURRENT_DESKTOP \
+  XDG_DATA_DIRS \
+  XDG_MENU_PREFIX \
+  XDG_RUNTIME_DIR \
+  XDG_SESSION_DESKTOP \
+  XDG_SESSION_TYPE; do
+  if [[ -n "${!name-}" ]]; then
+    env_args+=(--env "$name=${!name}")
+  fi
+done
+
+command=(/usr/bin/fish)
+if [[ $# -gt 0 ]]; then
+  command+=("$@")
+fi
+
+exec podman exec \
+  --interactive \
+  --tty \
+  --user "$user" \
+  --workdir "$workdir" \
+  --env "PWD=$workdir" \
+  --env "CONTAINER_ID=$container" \
+  --env "DISTROBOX_ENTER_PATH=/usr/bin/distrobox-enter" \
+  "${env_args[@]}" \
+  "$container" \
+  "${command[@]}"
