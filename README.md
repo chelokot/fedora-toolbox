@@ -21,3 +21,5 @@ Inside Distrobox, `xdg-open`, `gio`, `dbus-run-session`, `podman`, `docker`, `di
 Codex is installed with Bun in the image. Runtime state stays in the mounted home directory under `$HOME/.codex`.
 
 Fish is the default shell for repo-managed Distrobox containers. The image includes Starship, Fisher, and `chelokot/starship-show-on-command.fish`; default fish and Starship configs are copied into `/etc/skel`.
+
+For Ptyxis profiles that should open this toolbox quickly, use `host/fedora-toolbox-fast-shell` as a host-side custom command. It skips Distrobox's per-tab environment builder for already running containers and goes directly through `podman exec`.
