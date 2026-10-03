@@ -38,7 +38,7 @@ if status is-interactive
 
         __starship_set_job_count
 
-        set -l prompt_lines (/usr/bin/starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="$STARSHIP_CMD_PIPESTATUS" --keymap=$STARSHIP_KEYMAP --cmd-duration=$STARSHIP_DURATION --jobs=$STARSHIP_JOBS | string split \n)
+        set -l prompt_lines (command starship prompt --terminal-width="$COLUMNS" --status=$STARSHIP_CMD_STATUS --pipestatus="$STARSHIP_CMD_PIPESTATUS" --keymap=$STARSHIP_KEYMAP --cmd-duration=$STARSHIP_DURATION --jobs=$STARSHIP_JOBS | string split \n)
         set -l right_context (__chelokot_container_context)
 
         if test (count $prompt_lines) -eq 0
