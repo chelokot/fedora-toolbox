@@ -1,0 +1,3 @@
+corepack
+ts-node
+typescript

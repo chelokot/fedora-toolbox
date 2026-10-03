@@ -2,8 +2,9 @@
 set -euo pipefail
 
 required_bins=(
+  adb
   aws
-  az
+  bsdtar
   bun
   cargo
   cmake
@@ -14,6 +15,7 @@ required_bins=(
   delta
   distrobox
   docker
+  dotnet
   eza
   fd
   ffmpeg
@@ -23,22 +25,29 @@ required_bins=(
   gcc
   gh
   git
+  gitleaks
+  gke-gcloud-auth-plugin
   gio
   glab
   gcloud
   go
   helm
   helmfile
+  host-spawn
   ei-debug-events
   jq
   just
   kubectl
   magick
+  machine
   make
   mypy
   node
   npm
   openstack
+  parallel
+  pdftotext
+  perf
   podman
   poetry
   pre-commit
@@ -66,6 +75,11 @@ required_bins=(
   yq
   yt-dlp
   ydotool
+  wmctrl
+  xprop
+  xwininfo
+  xxd
+  lspci
 )
 
 for bin in "${required_bins[@]}"; do
@@ -111,23 +125,33 @@ for dep in "${distrobox_deps[@]}"; do
 done
 
 host_bridges=(
+  bootc
   dbus-run-session
   distrobox
-  docker
+  flatpak
   gio
-  podman
+  journalctl
+  rpm-ostree
   systemctl
+  toolbox
   xdg-open
 )
 
 for bridge in "${host_bridges[@]}"; do
-  path="$(command -v "$bridge")"
-  test "${path#/usr/local/bin/}" != "$path"
-  grep -q "distrobox-host-exec $bridge" "$path"
+  test "$(readlink -f "$(command -v "$bridge")")" = /usr/local/libexec/fedora-toolbox/host-bridge
+done
+
+for recorded in dnf pipx npm bun; do
+  test "$(readlink -f "$(command -v "$recorded")")" = /usr/local/libexec/fedora-toolbox/record-wrapper
+done
+
+for remote in podman docker; do
+  test "$(readlink -f "$(command -v "$remote")")" = /usr/bin/podman-remote
 done
 
 aws --version
-az version --output none
+machine --version
+dotnet --version
 bun --version
 codex --version
 deno --version

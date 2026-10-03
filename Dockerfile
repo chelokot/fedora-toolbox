@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora-toolbox:43
+FROM quay.io/fedora/fedora-toolbox:44
 
 ARG EXPOSEDCAT_DOTFILES_REF=0b9071e95f67f67dabb917d761a4fa2948c1148e
 
@@ -7,40 +7,17 @@ ENV LANG=en_US.UTF-8 \
     BUN_INSTALL=/opt/bun \
     PIPX_HOME=/opt/pipx \
     PIPX_BIN_DIR=/usr/local/bin \
-    PATH=/opt/bun/bin:/usr/local/bin:/usr/local/sbin:/usr/bin
+    PATH=/usr/local/bin:/usr/local/sbin:/opt/bun/bin:/usr/bin
 
+COPY repos/ /etc/yum.repos.d/
+COPY packages/dnf.txt packages/dnf-remove.txt /usr/share/fedora-toolbox/packages/
 RUN dnf -y upgrade && \
-    dnf -y install \
-      bash-completion bat bc bind-utils bzip2 curl dbus dbus-daemon dbus-tools diffutils eza fd-find ffmpeg-free findutils fish fuse-overlayfs fzf gcc gcc-c++ git git-delta git-lfs glib2 glib2-devel glibc-langpack-en gnupg2 golang gtk4 hostname ImageMagick iproute iputils jq just keyutils krb5-libs less libX11-devel libXcursor-devel libXi-devel libXinerama-devel libXrandr-devel libXxf86vm-devel libadwaita libei-utils libxcrypt-compat.x86_64 libxkbcommon-devel lsof make man-db man-pages mesa-libGL-devel mtr ncurses ninja-build nmap-ncat npm openssl pam passwd pigz pinentry pipx pkgconf-pkg-config podman-compose podman-remote postgresql ripgrep rust cargo rustfmt rsync shadow-utils ShellCheck shfmt slirp4netns sqlite strace sudo tcpdump time traceroute tree unzip util-linux util-linux-script vte-profile vte291-gtk4 wev weston weston-demo wget which whois wl-clipboard words wtype xdg-dbus-proxy xdg-utils xdotool xorg-x11-server-Xvfb xorg-x11-xauth xz ydotool yq yt-dlp zip zsh \
-      cmake clang clang-tools-extra java-21-openjdk java-21-openjdk-devel python3 python3-devel python3-pip python3.12 python3.12-devel python3-dotenv python3-lxml python3-pyyaml && \
-    dnf clean all
-
-RUN rpm --import https://rpm.releases.hashicorp.com/gpg && \
-    rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
-    printf '[hashicorp]\nname=Hashicorp Stable - $basearch\nbaseurl=https://rpm.releases.hashicorp.com/fedora/$releasever/$basearch/stable\nenabled=1\ngpgcheck=1\ngpgkey=https://rpm.releases.hashicorp.com/gpg\n' > /etc/yum.repos.d/hashicorp.repo && \
-    printf '[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc\n' > /etc/yum.repos.d/azure-cli.repo && \
-    dnf -y install gh glab terraform azure-cli && \
-    dnf clean all
-
-RUN tee /etc/yum.repos.d/google-cloud-cli.repo <<'EOF'
-[google-cloud-cli]
-name=Google Cloud CLI
-baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el8-x86_64
-enabled=1
-gpgcheck=1
-repo_gpgcheck=0
-gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
-RUN dnf -y install google-cloud-cli && \
+    sed 's/#.*//' /usr/share/fedora-toolbox/packages/dnf.txt | xargs dnf -y install && \
+    sed 's/#.*//' /usr/share/fedora-toolbox/packages/dnf-remove.txt | xargs -r dnf -y remove && \
     dnf clean all && \
     KUBECTL_VERSION="$(curl -fsSL https://dl.k8s.io/release/stable.txt)" && \
     curl -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     chmod +x /usr/local/bin/kubectl
-
-RUN curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip && \
-    unzip -q /tmp/awscliv2.zip -d /tmp && \
-    /tmp/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli && \
-    rm -rf /tmp/aws /tmp/awscliv2.zip
 
 RUN curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash && \
     HELMFILE_URL="$(curl -fsSL https://api.github.com/repos/helmfile/helmfile/releases/latest | jq -r '.assets[] | select(.name | test("linux_amd64.tar.gz$")) | .browser_download_url')" && \
@@ -49,18 +26,14 @@ RUN curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm
     install -m 0755 /tmp/helmfile /usr/local/bin/helmfile && \
     rm -f /tmp/helmfile /tmp/helmfile.tar.gz
 
-RUN curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh && \
-    pipx install poetry && \
-    pipx install ruff && \
-    pipx install mypy && \
-    pipx install pre-commit && \
-    pipx install yamllint && \
-    pipx install python-openstackclient && \
+COPY packages/pipx.txt /usr/share/fedora-toolbox/packages/
+RUN sed 's/#.*//' /usr/share/fedora-toolbox/packages/pipx.txt | xargs -r -n1 pipx install && \
     pipx inject python-openstackclient python-cinderclient python-heatclient python-glanceclient
 
+COPY packages/bun.txt packages/npm.txt /usr/share/fedora-toolbox/packages/
 RUN curl -fsSL https://bun.sh/install | bash && \
-    bun add --global @openai/codex && \
-    npm install -g typescript ts-node corepack && \
+    sed 's/#.*//' /usr/share/fedora-toolbox/packages/bun.txt | xargs -r bun add --global && \
+    sed 's/#.*//' /usr/share/fedora-toolbox/packages/npm.txt | xargs -r npm install -g && \
     corepack enable && \
     curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 
@@ -78,6 +51,7 @@ RUN mkdir -p /etc/fish/conf.d /etc/skel/.config/fish/conf.d && \
     sed -i \
       -e 's/^set -Ux fish_color_command .*/set -Ux fish_color_command 7ee787/' \
       -e 's/^set -Ux fish_color_error .*/set -Ux fish_color_error ff6b81/' \
+      -e 's/^set -Ux /set -g /' \
       /etc/fish/conf.d/10-exposedcat-colors.fish && \
     curl -fsSL "https://raw.githubusercontent.com/ExposedCat/dotfiles/${EXPOSEDCAT_DOTFILES_REF}/fish/config.fish" -o /tmp/exposedcat-config.fish && \
     grep -E '^[[:space:]]*set[[:space:]]+-g[[:space:]]+fish_greeting([[:space:]]|$)' /tmp/exposedcat-config.fish > /etc/fish/conf.d/00-exposedcat-greeting.fish && \
@@ -95,15 +69,21 @@ RUN mkdir -p /root/.config/fish/conf.d && \
     chsh -s /usr/bin/fish root || true && \
     printf 'if [ -n "$BASH_VERSION" -a -t 1 ] && [ -z "$FEDORA_TOOLBOX_NO_AUTO_FISH" ]; then exec /usr/bin/fish -l; fi\n' > /etc/profile.d/90-auto-fish.sh
 
-RUN for bin in xdg-open gio dbus-run-session systemctl distrobox; do \
-      printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec %s "$@"; fi\nexec /usr/bin/%s "$@"\n' "$bin" "$bin" > "/usr/local/bin/$bin"; \
+COPY --from=ghcr.io/chelokot/machine-cli:latest /machine /usr/local/bin/machine
+COPY bin/record-wrapper bin/host-bridge /usr/local/libexec/fedora-toolbox/
+RUN for bin in dnf pipx npm bun; do \
+      ln -s ../libexec/fedora-toolbox/record-wrapper "/usr/local/bin/$bin"; \
     done && \
-    printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec podman "$@"; fi\nexec /usr/bin/podman-remote "$@"\n' > /usr/local/bin/podman && \
-    printf '#!/usr/bin/env sh\nif [ -n "${DISTROBOX_ENTER_PATH:-}" ] && command -v distrobox-host-exec >/dev/null 2>&1; then exec distrobox-host-exec docker "$@"; fi\nexec /usr/bin/podman-remote "$@"\n' > /usr/local/bin/docker && \
-    chmod +x /usr/local/bin/xdg-open /usr/local/bin/gio /usr/local/bin/dbus-run-session /usr/local/bin/systemctl /usr/local/bin/distrobox /usr/local/bin/podman /usr/local/bin/docker && \
+    for bin in xdg-open gio dbus-run-session systemctl journalctl distrobox flatpak rpm-ostree bootc toolbox; do \
+      ln -s ../libexec/fedora-toolbox/host-bridge "/usr/local/bin/$bin"; \
+    done && \
+    ln -s /usr/bin/podman-remote /usr/local/bin/podman && \
+    ln -s /usr/bin/podman-remote /usr/local/bin/docker && \
+    printf 'ALL ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/fedora-toolbox && \
+    chmod 0440 /etc/sudoers.d/fedora-toolbox && \
     printf 'if [ -n "$XDG_RUNTIME_DIR" ]; then\n  export CONTAINER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\n  export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\nfi\n' > /etc/profile.d/99-podman-remote.sh
 
-COPY test/build/smoke.sh /test/build/smoke.sh
+COPY test/build/ /test/build/
 RUN bash -x /test/build/smoke.sh
 
 LABEL org.containers.toolbox="true"
