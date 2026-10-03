@@ -4,16 +4,32 @@ on:
   push:
     branches: [ main ]
   pull_request: {}
+  workflow_dispatch: {}
   schedule:
     # 03:00 Europe/Kyiv == 00:00 UTC, every day
     - cron: '0 0 * * *'
 
 jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan history for secrets
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest git /repo --redact --verbose
+
   build:
+    needs: secrets
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
     env:
       IMAGE: ghcr.io/${{ github.repository }}
     steps:
@@ -53,12 +69,24 @@ jobs:
             type=raw,value=${{ env.PR_TAG }},enable=${{ github.event_name == 'pull_request' }}
 
       - name: Build and Push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Sign image
+        run: cosign sign --yes "${IMAGE}@${{ steps.build.outputs.digest }}"
+
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
 
       # - name: Smoke test
       #   env:

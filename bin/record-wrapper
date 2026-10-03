@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+manager="${0##*/}"
+case "$manager" in
+  bun) real=/opt/bun/bin/bun ;;
+  *) real="/usr/bin/$manager" ;;
+esac
+"$real" "$@"
+status=$?
+if [ "$status" -eq 0 ]; then
+  machine record "$manager" "$@"
+fi
+exit "$status"
