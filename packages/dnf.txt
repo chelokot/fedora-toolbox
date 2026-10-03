@@ -67,7 +67,6 @@ man-pages
 mesa-libGL-devel
 ncurses
 ninja-build
-nix
 nmap-ncat
 npm
 openssl

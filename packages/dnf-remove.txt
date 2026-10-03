@@ -1,0 +1,3 @@
+nix-core
+nix-daemon
+nix-legacy
