@@ -10,6 +10,7 @@ ENV LANG=en_US.UTF-8 \
     PATH=/usr/local/bin:/usr/local/sbin:/opt/bun/bin:/usr/bin
 
 COPY repos/ /etc/yum.repos.d/
+COPY keys/ /etc/pki/rpm-gpg/
 COPY packages/dnf.txt packages/dnf-remove.txt /usr/share/fedora-toolbox/packages/
 RUN dnf -y upgrade && \
     sed 's/#.*//' /usr/share/fedora-toolbox/packages/dnf.txt | xargs dnf -y install && \

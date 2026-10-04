@@ -150,6 +150,9 @@ for remote in podman docker; do
 done
 
 aws --version
+chatgpt --version || test -x /usr/bin/chatgpt
+nix --version
+systemctl --version >/dev/null
 machine --version
 dotnet --version
 bun --version
