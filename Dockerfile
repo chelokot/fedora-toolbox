@@ -38,6 +38,12 @@ RUN curl -fsSL https://bun.sh/install | bash && \
     corepack enable && \
     curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 
+COPY packages/cargo.txt packages/uv.txt packages/go.txt /usr/share/dev/packages/
+RUN sed -e 's/#.*//' -e '/^\s*$/d' /usr/share/dev/packages/cargo.txt | xargs -r cargo install --locked --root /usr/local && \
+    sed -e 's/#.*//' -e '/^\s*$/d' /usr/share/dev/packages/uv.txt | UV_TOOL_DIR=/opt/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin xargs -r -n1 uv tool install && \
+    sed -e 's/#.*//' -e '/^\s*$/d' /usr/share/dev/packages/go.txt | GOBIN=/usr/local/bin GOPATH=/tmp/go xargs -r -I{} go install {}@latest && \
+    rm -rf /root/.cargo /root/.cache /tmp/go
+
 RUN curl -fsSL https://starship.rs/install.sh | sh -s -- --yes --bin-dir /usr/bin && \
     mkdir -p /usr/share/fish/vendor_conf.d /usr/share/fish/vendor_functions.d /usr/share/fish/vendor_completions.d && \
     curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish -o /usr/share/fish/vendor_functions.d/fisher.fish && \
