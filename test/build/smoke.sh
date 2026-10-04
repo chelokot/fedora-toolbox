@@ -76,6 +76,10 @@ required_bins=(
   yt-dlp
   ydotool
   wmctrl
+  openbox
+  xdotool
+  xdpyinfo
+  Xvfb
   xprop
   xwininfo
   xxd

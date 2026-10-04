@@ -71,6 +71,7 @@ ninja-build
 nix
 nmap-ncat
 npm
+openbox
 openssl
 pam
 parallel
@@ -127,6 +128,7 @@ wtype
 xdg-dbus-proxy
 xdg-utils
 xdotool
+xdpyinfo
 xorg-x11-server-Xvfb
 xorg-x11-xauth
 xprop
