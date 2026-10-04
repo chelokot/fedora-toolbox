@@ -11,10 +11,10 @@ ENV LANG=en_US.UTF-8 \
 
 COPY repos/ /etc/yum.repos.d/
 COPY keys/ /etc/pki/rpm-gpg/
-COPY packages/dnf.txt packages/dnf-remove.txt /usr/share/fedora-toolbox/packages/
+COPY packages/dnf.txt packages/dnf-remove.txt /usr/share/dev/packages/
 RUN dnf -y upgrade && \
-    sed 's/#.*//' /usr/share/fedora-toolbox/packages/dnf.txt | xargs dnf -y install && \
-    sed 's/#.*//' /usr/share/fedora-toolbox/packages/dnf-remove.txt | xargs -r dnf -y remove && \
+    sed 's/#.*//' /usr/share/dev/packages/dnf.txt | xargs dnf -y install && \
+    sed 's/#.*//' /usr/share/dev/packages/dnf-remove.txt | xargs -r dnf -y remove && \
     dnf clean all && \
     KUBECTL_VERSION="$(curl -fsSL https://dl.k8s.io/release/stable.txt)" && \
     curl -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
@@ -27,14 +27,14 @@ RUN curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm
     install -m 0755 /tmp/helmfile /usr/local/bin/helmfile && \
     rm -f /tmp/helmfile /tmp/helmfile.tar.gz
 
-COPY packages/pipx.txt /usr/share/fedora-toolbox/packages/
-RUN sed 's/#.*//' /usr/share/fedora-toolbox/packages/pipx.txt | xargs -r -n1 pipx install && \
+COPY packages/pipx.txt /usr/share/dev/packages/
+RUN sed 's/#.*//' /usr/share/dev/packages/pipx.txt | xargs -r -n1 pipx install && \
     pipx inject python-openstackclient python-cinderclient python-heatclient python-glanceclient
 
-COPY packages/bun.txt packages/npm.txt /usr/share/fedora-toolbox/packages/
+COPY packages/bun.txt packages/npm.txt /usr/share/dev/packages/
 RUN curl -fsSL https://bun.sh/install | bash && \
-    sed 's/#.*//' /usr/share/fedora-toolbox/packages/bun.txt | xargs -r bun add --global && \
-    sed 's/#.*//' /usr/share/fedora-toolbox/packages/npm.txt | xargs -r npm install -g && \
+    sed 's/#.*//' /usr/share/dev/packages/bun.txt | xargs -r bun add --global && \
+    sed 's/#.*//' /usr/share/dev/packages/npm.txt | xargs -r npm install -g && \
     corepack enable && \
     curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 
@@ -58,30 +58,30 @@ RUN mkdir -p /etc/fish/conf.d /etc/skel/.config/fish/conf.d && \
     grep -E '^[[:space:]]*set[[:space:]]+-g[[:space:]]+fish_greeting([[:space:]]|$)' /tmp/exposedcat-config.fish > /etc/fish/conf.d/00-exposedcat-greeting.fish && \
     rm -f /tmp/exposedcat-config.fish
 COPY fish/config.fish /etc/skel/.config/fish/config.fish
-COPY fish/conf.d/distrobox_config.fish /etc/skel/.config/fish/conf.d/distrobox_config.fish
+COPY fish/conf.d/container.fish /etc/skel/.config/fish/conf.d/container.fish
 COPY fish/fish_plugins /etc/skel/.config/fish/fish_plugins
 COPY starship.toml /etc/starship.toml
 COPY starship.toml /etc/skel/.config/starship.toml
 RUN mkdir -p /root/.config/fish/conf.d && \
     cp /etc/skel/.config/fish/config.fish /root/.config/fish/config.fish && \
-    cp /etc/skel/.config/fish/conf.d/distrobox_config.fish /root/.config/fish/conf.d/distrobox_config.fish && \
+    cp /etc/skel/.config/fish/conf.d/container.fish /root/.config/fish/conf.d/container.fish && \
     cp /etc/skel/.config/fish/fish_plugins /root/.config/fish/fish_plugins && \
     cp /etc/skel/.config/starship.toml /root/.config/starship.toml && \
     chsh -s /usr/bin/fish root || true && \
-    printf 'if [ -n "$BASH_VERSION" -a -t 1 ] && [ -z "$FEDORA_TOOLBOX_NO_AUTO_FISH" ]; then exec /usr/bin/fish -l; fi\n' > /etc/profile.d/90-auto-fish.sh
+    printf 'if [ -n "$BASH_VERSION" -a -t 1 ] && [ -z "$DEV_NO_AUTO_FISH" ]; then exec /usr/bin/fish -l; fi\n' > /etc/profile.d/90-auto-fish.sh
 
 COPY --from=ghcr.io/chelokot/machine-cli:latest /machine /usr/local/bin/machine
-COPY bin/record-wrapper bin/host-bridge /usr/local/libexec/fedora-toolbox/
+COPY bin/record-wrapper bin/host-bridge /usr/local/libexec/dev/
 RUN for bin in dnf pipx npm bun; do \
-      ln -s ../libexec/fedora-toolbox/record-wrapper "/usr/local/bin/$bin"; \
+      ln -s ../libexec/dev/record-wrapper "/usr/local/bin/$bin"; \
     done && \
-    for bin in xdg-open gio dbus-run-session systemctl journalctl distrobox flatpak rpm-ostree bootc toolbox; do \
-      ln -s ../libexec/fedora-toolbox/host-bridge "/usr/local/bin/$bin"; \
+    for bin in xdg-open gio dbus-run-session systemctl journalctl flatpak rpm-ostree bootc; do \
+      ln -s ../libexec/dev/host-bridge "/usr/local/bin/$bin"; \
     done && \
     ln -s /usr/bin/podman-remote /usr/local/bin/podman && \
     ln -s /usr/bin/podman-remote /usr/local/bin/docker && \
-    printf 'ALL ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/fedora-toolbox && \
-    chmod 0440 /etc/sudoers.d/fedora-toolbox && \
+    printf 'ALL ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/dev && \
+    chmod 0440 /etc/sudoers.d/dev && \
     printf 'if [ -n "$XDG_RUNTIME_DIR" ]; then\n  export CONTAINER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\n  export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"\nfi\n' > /etc/profile.d/99-podman-remote.sh
 
 COPY test/build/ /test/build/

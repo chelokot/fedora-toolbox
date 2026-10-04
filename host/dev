@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-container="${FEDORA_TOOLBOX_CONTAINER:-fedora-toolbox}"
-user="${FEDORA_TOOLBOX_USER:-${USER:-chelokot}}"
 workdir="${PWD:-$HOME}"
 
 if [[ ! -d "$workdir" ]]; then
@@ -42,11 +40,10 @@ fi
 exec podman exec \
   --interactive \
   --tty \
-  --user "$user" \
+  --user "$USER" \
   --workdir "$workdir" \
   --env "PWD=$workdir" \
-  --env "CONTAINER_ID=$container" \
-  --env "DISTROBOX_ENTER_PATH=/usr/bin/distrobox-enter" \
+  --env "CONTAINER_ID=dev" \
   "${env_args[@]}" \
-  "$container" \
+  dev \
   "${command[@]}"

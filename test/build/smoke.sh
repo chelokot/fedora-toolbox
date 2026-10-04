@@ -13,7 +13,6 @@ required_bins=(
   dbus-run-session
   deno
   delta
-  distrobox
   docker
   dotnet
   eza
@@ -90,7 +89,7 @@ for bin in "${required_bins[@]}"; do
   command -v "$bin" >/dev/null
 done
 
-distrobox_deps=(
+basic_tools=(
   bc
   bzip2
   chpasswd
@@ -124,29 +123,27 @@ distrobox_deps=(
   zip
 )
 
-for dep in "${distrobox_deps[@]}"; do
+for dep in "${basic_tools[@]}"; do
   command -v "$dep" >/dev/null
 done
 
 host_bridges=(
   bootc
   dbus-run-session
-  distrobox
   flatpak
   gio
   journalctl
   rpm-ostree
   systemctl
-  toolbox
   xdg-open
 )
 
 for bridge in "${host_bridges[@]}"; do
-  test "$(readlink -f "$(command -v "$bridge")")" = /usr/local/libexec/fedora-toolbox/host-bridge
+  test "$(readlink -f "$(command -v "$bridge")")" = /usr/local/libexec/dev/host-bridge
 done
 
 for recorded in dnf pipx npm bun; do
-  test "$(readlink -f "$(command -v "$recorded")")" = /usr/local/libexec/fedora-toolbox/record-wrapper
+  test "$(readlink -f "$(command -v "$recorded")")" = /usr/local/libexec/dev/record-wrapper
 done
 
 for remote in podman docker; do
@@ -192,11 +189,7 @@ tsc --version
 uv --version
 yq --version
 yt-dlp --version
-fish -lc "functions -q fisher; functions -q starship-soc; test -r /etc/starship.toml; test -r /etc/skel/.config/fish/config.fish; test -r /etc/skel/.config/fish/conf.d/distrobox_config.fish; test -r /etc/skel/.config/fish/fish_plugins; test -r /etc/fish/conf.d/00-exposedcat-greeting.fish; test -r /etc/fish/conf.d/10-exposedcat-colors.fish; test -r /etc/skel/.config/starship.toml; test \"\$fish_greeting\" = \"\"; test \"\$fish_color_command\" = 7ee787; test \"\$fish_color_error\" = ff6b81"
-
-if [ -n "${DISTROBOX_ENTER_PATH:-}" ]; then
-  command -v distrobox-export >/dev/null
-fi
+fish -lc "functions -q fisher; functions -q starship-soc; test -r /etc/starship.toml; test -r /etc/skel/.config/fish/config.fish; test -r /etc/skel/.config/fish/conf.d/container.fish; test -r /etc/skel/.config/fish/fish_plugins; test -r /etc/fish/conf.d/00-exposedcat-greeting.fish; test -r /etc/fish/conf.d/10-exposedcat-colors.fish; test -r /etc/skel/.config/starship.toml; test \"\$fish_greeting\" = \"\"; test \"\$fish_color_command\" = 7ee787; test \"\$fish_color_error\" = ff6b81"
 
 test ! -d /root/.config/gcloud/legacy_credentials
 test ! -e /run/secrets/gcp_key.json
@@ -208,4 +201,4 @@ if command -v zsh >/dev/null; then
   exit 1
 fi
 
-echo "basic toolbox tools work"
+echo "dev image tools work"

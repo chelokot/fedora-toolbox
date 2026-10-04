@@ -88,11 +88,6 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
-      # - name: Smoke test
-      #   env:
-      #     IMAGE: ${{ env.IMAGE }}:test
-      #   run: ./test/runtime/smoke.sh
-
   keepalive:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
