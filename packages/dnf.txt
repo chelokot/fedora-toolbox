@@ -1,5 +1,4 @@
 android-tools
-awscli2
 bash-completion
 bat
 bc
@@ -27,7 +26,6 @@ fuse-overlayfs
 fzf
 gcc
 gcc-c++
-gh
 git
 git-delta
 git-lfs

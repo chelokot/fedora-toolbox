@@ -3,7 +3,6 @@ set -euo pipefail
 
 required_bins=(
   adb
-  aws
   bsdtar
   bun
   cargo
@@ -22,7 +21,6 @@ required_bins=(
   fish
   fzf
   gcc
-  gh
   git
   gitleaks
   gke-gcloud-auth-plugin
@@ -48,7 +46,6 @@ required_bins=(
   pdftotext
   perf
   podman
-  poetry
   pre-commit
   psql
   python3
@@ -150,7 +147,6 @@ for remote in podman docker; do
   test "$(readlink -f "$(command -v "$remote")")" = /usr/bin/podman-remote
 done
 
-aws --version
 chatgpt --version || test -x /usr/bin/chatgpt
 nix --version
 systemctl --version >/dev/null
@@ -164,7 +160,6 @@ eza --version
 ffmpeg -version >/dev/null
 ffprobe -version >/dev/null
 fish --version
-gh --version
 glab --version
 gcloud --version
 go version
@@ -176,7 +171,6 @@ magick -version
 node --version
 npm --version
 openstack --version
-poetry --version
 python3 --version
 python3.12 --version
 rustc --version

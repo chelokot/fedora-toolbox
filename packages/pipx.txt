@@ -1,5 +1,4 @@
 mypy
-poetry
 pre-commit
 python-openstackclient
 ruff
