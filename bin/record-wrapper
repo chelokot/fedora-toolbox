@@ -4,7 +4,22 @@ case "$manager" in
   bun) real=/opt/bun/bin/bun ;;
   *) real="/usr/bin/$manager" ;;
 esac
-"$real" "$@"
+case "$manager" in
+  dnf | pipx) system=true ;;
+  *)
+    system=false
+    for argument in "$@"; do
+      case "$argument" in
+        -g | --global | --location=global) system=true ;;
+      esac
+    done
+    ;;
+esac
+if [ "$system" = true ] && [ "$(id -u)" != 0 ]; then
+  sudo --preserve-env=BUN_INSTALL,PIPX_HOME,PIPX_BIN_DIR "$real" "$@"
+else
+  "$real" "$@"
+fi
 status=$?
 if [ "$status" -eq 0 ]; then
   machine record "$manager" "$@"
