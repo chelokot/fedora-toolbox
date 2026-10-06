@@ -139,7 +139,7 @@ for bridge in "${host_bridges[@]}"; do
   test "$(readlink -f "$(command -v "$bridge")")" = /usr/local/libexec/dev/host-bridge
 done
 
-for recorded in dnf pipx npm bun; do
+for recorded in dnf pipx npm; do
   test "$(readlink -f "$(command -v "$recorded")")" = /usr/local/libexec/dev/record-wrapper
 done
 
@@ -153,6 +153,7 @@ systemctl --version >/dev/null
 machine --version
 dotnet --version
 bun --version
+test -z "${BUN_INSTALL:-}"
 codex --version
 deno --version
 delta --version

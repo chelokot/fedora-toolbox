@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 manager="${0##*/}"
-case "$manager" in
-  bun) real=/opt/bun/bin/bun ;;
-  *) real="/usr/bin/$manager" ;;
-esac
+real="/usr/bin/$manager"
 case "$manager" in
   dnf | pipx) system=true ;;
   *)
@@ -16,7 +13,7 @@ case "$manager" in
     ;;
 esac
 if [ "$system" = true ] && [ "$(id -u)" != 0 ]; then
-  sudo --preserve-env=BUN_INSTALL,PIPX_HOME,PIPX_BIN_DIR "$real" "$@"
+  sudo --preserve-env=PIPX_HOME,PIPX_BIN_DIR "$real" "$@"
 else
   "$real" "$@"
 fi

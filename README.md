@@ -20,7 +20,7 @@ Everything installed into the image is declared in `packages/`:
 | `packages/uv.txt` | `uv tool install` |
 | `packages/go.txt` | `go install <package>@latest` |
 
-Inside the container `dnf`, `pipx`, `npm` and `bun` are wrappers. After a successful install or removal, [`machine record`](https://github.com/chelokot/machine) updates the matching manifest in a checkout at `~/.local/share/dev`, commits and pushes to `main` in the background, so the next image build includes the change. `cargo install`, `uv tool install` and `go install` write into `$HOME` from the host or the container alike, so instead of wrappers the hourly `machine sync` captures what is installed there into `cargo.txt`, `uv.txt` and `go.txt`. Failures are logged to `~/.local/state/machine/record.log`. Set `MACHINE_RECORD=0` to skip recording for one command.
+Inside the container `dnf`, `pipx` and `npm` are wrappers. After a successful install or removal, [`machine record`](https://github.com/chelokot/machine) updates the matching manifest in a checkout at `~/.local/share/dev`, commits and pushes to `main` in the background, so the next image build includes the change. `bun add --global`, `cargo install`, `uv tool install` and `go install` write into `$HOME` from the host or the container alike, so instead of wrappers the hourly `machine sync` captures what is installed there into `bun.txt`, `cargo.txt`, `uv.txt` and `go.txt`. Failures are logged to `~/.local/state/machine/record.log`. Set `MACHINE_RECORD=0` to skip recording for one command.
 
 Images are rebuilt daily, signed with cosign (keyless, GitHub OIDC) and carry build provenance attestations:
 
